@@ -1,76 +1,122 @@
 import streamlit as st
+import sklearn
+import helper
 import pickle
 import nltk
-import helper   # Ensure the helper module is in your project
+from PIL import Image
 
-# Download NLTK resources
-nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 nltk.download('wordnet')
 
-# Load model and vectorizer
-model = pickle.load(open("model.pkl", 'rb'))
-vectorizer = pickle.load(open("vectorizer.pkl", 'rb'))
+model = pickle.load(open("model.pkl",'rb'))
 
-# Custom styles
+vectorizer = pickle.load(open("vectorizer.pkl","rb"))
+
 st.markdown(
     """
     <style>
-    .main-title {
-        font-size: 40px;
-        font-weight: bold;
-        text-align: center;
-        color: #4CAF50;
-        margin-bottom: 20px;
+    [data-testid="stAppViewContainer"]{
+    background-size: auto; /* Prevents scaling with window size */
+    transform: scale(1); /* Zoom level set to 180% */
+    transform-origin: center; /* Keeps the zoom centered */
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; }
+
+    [data-testid="stHeader"]{
+
     }
-    .sub-title {
-        font-size: 18px;
-        text-align: center;
-        margin-bottom: 30px;
-        color: #555;
-    }
-    .prediction-box {
-        font-size: 24px;
-        font-weight: bold;
-        color: #FFA726;
-        text-align: center;
-        border: 2px solid #FFA726;
-        padding: 10px;
-        border-radius: 10px;
-        margin-top: 20px;
-        background-color: #FFF3E0;
-    }
-    .footer {
-        text-align: center;
-        font-size: 14px;
-        margin-top: 40px;
-        color: #888;
-    }
+    .center-content {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }}
+        .stTextInput, .stButton {{
+            margin-top: 20px;
+            width: 300px;
+        }}
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
-# App title and description
-st.markdown('<div class="main-title">Sentiment Analysis App</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Enter a review to predict its sentiment using Machine Learning</div>', unsafe_allow_html=True)
 
-# Input text
-text = st.text_area("Please enter your review:", placeholder="Type your review here...", height=150)
+title = "<h1 style='text-align: left; color: #FF5733; white-space: nowrap;'>Sentiment Analysis Application using ML ✨</h1>" 
+st.markdown(title, unsafe_allow_html=True)
 
-# Predict sentiment
-if st.button("Predict Sentiment"):
-    if text.strip():
-        # Preprocess and predict
-        token=helper.preprocess_text(text)
-        vectorized_data = vectorizer.transform([token])
-        prediction = model.predict(vectorized_data)
+st.markdown('<div class="center-content">', unsafe_allow_html=True)
 
-        # Display the prediction result
-        sentiment = "Positive" if prediction[0] == 1 else "Negative"
-        st.markdown(f'<div class="prediction-box">Predicted Sentiment: {sentiment}</div>', unsafe_allow_html=True)
+text = st.text_input("Please enter your review")
+
+state = st.button("Predict","review")
+
+token= helper.preprocess_text(text)
+vector = vectorizer.transform([token])
+prediction = model.predict(vector).item()
+
+if state:
+    # Add your prediction logic here
+    if prediction == 1:
+
+        st.markdown("<h3 style='background-color: white; color: green;padding: 15px 20px;border-radius: 20px;box-shadow: 0 4px 6px rgba(0, 0, 0, 1); /* Adds a subtle shadow for better appearance */text-align: right;font-family: Arial, sans-serif; font-size: 70px;display: inline-block'>👍 Positive Review</h3>",unsafe_allow_html=True)
+        st.markdown(
+        """
+        <style>
+        .dynamic-bg {
+            animation: green-to-transparent 10s infinite;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        @keyframes green-to-transparent {
+            0% { background-color: rgba(0, 77, 0, 0.8); } /* Dark Green with 80% opacity */
+            25% { background-color: rgba(0, 128, 0, 0.6); } /* Green with 60% opacity */
+            50% { background-color: rgba(102, 255, 102, 0.4); } /* Light Green with 40% opacity */
+            75% { background-color: rgba(204, 255, 204, 0.2); } /* Pale Green with 20% opacity */
+            100% { background-color: rgba(255, 255, 255, 0); } /* Fully Transparent */
+        }
+        </style>
+        <div class="dynamic-bg"></div>
+        """,
+        unsafe_allow_html=True
+    )
+        st.balloons()
+       
     else:
-        st.error("Please enter some text before predicting.")
+        st.markdown("<h3 style='background-color: white; color: red; padding: 15px 20px;border-radius: 20px;box-shadow: 0 4px 6px rgba(0, 0, 0, 1); /* Adds a subtle shadow for better appearance */text-align: right;font-family: Arial, sans-serif;font-size: 70px;display: inline-block''>👎 Negative Review</h3>",unsafe_allow_html=True)
+        st.markdown(
+        """
+        <style>
+        .dynamic-bg {
+            animation: red-to-transparent 10s infinite;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
 
-# Footer
-st.markdown('<div class="footer">Built with ❤️ using Streamlit</div>', unsafe_allow_html=True)
+        @keyframes red-to-transparent {
+            0% { background-color: rgba(128, 0, 0, 0.8); } /* Dark Red with 80% opacity */
+            25% { background-color: rgba(255, 0, 0, 0.6); } /* Red with 60% opacity */
+            50% { background-color: rgba(255, 102, 102, 0.4); } /* Light Red with 40% opacity */
+            75% { background-color: rgba(255, 204, 204, 0.2); } /* Pale Red with 20% opacity */
+            100% { background-color: rgba(255, 255, 255, 0); } /* Fully Transparent */
+        }
+        </style>
+        <div class="dynamic-bg"></div>
+        """,
+        unsafe_allow_html=True,
+    )
