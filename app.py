@@ -1,7 +1,7 @@
 import streamlit as st
 import pickle
 import nltk
-from helper import preprocess_text  # Ensure the helper module is in your project
+import helper   # Ensure the helper module is in your project
 
 # Download NLTK resources
 nltk.download('punkt')
@@ -9,8 +9,8 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 # Load model and vectorizer
-model = pickle.load(open("model.pkl", 'rb'))
-vectorizer = pickle.load(open("vectorizer.pkl", 'rb'))
+model = pickle.load(open("models/model.pkl", 'rb'))
+vectorizer = pickle.load(open("models/vectorizer.pkl", 'rb'))
 
 # Custom styles
 st.markdown(
@@ -62,7 +62,7 @@ text = st.text_area("Please enter your review:", placeholder="Type your review h
 if st.button("Predict Sentiment"):
     if text.strip():
         # Preprocess and predict
-        token = preprocess_text(text)
+        token=helper.preprocess_text(text)
         vectorized_data = vectorizer.transform([token])
         prediction = model.predict(vectorized_data)
 
